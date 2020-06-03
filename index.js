@@ -1,5 +1,5 @@
 const express = require ('express');
-const creds = require ('./config');
+const creds = require ('./config');    // don't forget to change creds for client 
 const bodyParser = require ('body-parser'); // process the form data
 const nodemailer = require ('nodemailer');
 const cors = require ('cors'); // allow cross-origin requests
@@ -46,14 +46,14 @@ app.get ('/', (req, res) => {
 app.post ('/send', (req, res) => {
 
     const { name, email, message } = req.body;
-    const content = `
-                    <p>name: ${name}<p> 
-                    <p>email: ${email}<p> 
-                    <p>message: ${message}<p>`;
+    const content = `   
+        name: ${name} 
+        email: ${email} 
+        message: ${message}`;
 
     const mail = {
         from: name,
-        to: 'kristina.n.savova@gmail.com',
+        to: 'kristina.n.savova@gmail.com',            // don't forget to change email here
         subject: 'New Message from Contact Form',
         text: content 
     }
@@ -63,6 +63,16 @@ app.post ('/send', (req, res) => {
             res.json ({ msg: 'FAIL' });
         } else {
             res.json ({ msg: 'SUCCESS'});
+            transporter.sendMail ({
+                from: 'kristina.n.savova@gmail.com',            // don't forget to change email here 
+                to: email,
+                subject: 'Tobias Speiser has received your message',
+                text: `
+                    Dear ${name},
+                    thank you for contacting me! 
+                    I will reach you back as soon as possible.
+                    Sincerely, Tobias Speiser`
+            });
         }
     });
 });
