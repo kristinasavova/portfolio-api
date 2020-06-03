@@ -1,7 +1,8 @@
 const express = require ('express');
-const bodyParser = require ('body-parser');
+const creds = require ('./config');
+const bodyParser = require ('body-parser'); // process the form data
 const nodemailer = require ('nodemailer');
-const cors = require ('cors'); 
+const cors = require ('cors'); // allow cross-origin requests
 
 const app = express (); 
 
@@ -15,39 +16,50 @@ app.listen (port, () => {
     console.log (`Server is listening on ${port}`);
 });
 
+/* Configure transporter. The Simple Mail Transfer Protocol - SMTP - is a communication protocol for 
+electronic mail transmission. */
+
+const transport = {
+    host: 'smtp.gmail.com',
+    auth: {
+        user: creds.USER,
+        pass: creds.PASS
+    }
+};
+
+const transporter = nodemailer.createTransport (transport); 
+
+transporter.verify ( (error, success) => {
+    if (error) {
+        console.log (error); 
+    } else {
+        console.log ('Server is ready to take messages');
+    }
+});
+
 app.get ('/', (req, res) => {
     res.send ('Welcome to API!');
 });
 
-app.post ('api/v1', (req, res) => {
+/* POST data to the destination email address that is specified. */
 
-    const data = req.body;
+app.post ('/send', (req, res, next) => {
 
-    const smtpTransport = nodemailer.createTransport ({
-        service: 'Gmail',
-        port: 465,
-        auth: {
-            user: 'USERNAME',
-            pass: 'PASSWORD'
-        }
-    });
+    const { name, email, message } = req.body;
+    const content = `name: ${name} \n email: ${email} \n message: ${message}`;
 
-    const mailOptions = {
-        from: data.email,
+    const mail = {
+        from: name,
         to: 'kristina.n.savova@gmail.com',
-        subject: 'Nachricht von meiner Webseite',
-        html: `
-                <p>${data.name}<p>
-                <p>${data.email}<p>
-                <p>${data.message}<p>`
-    };
+        subject: 'New Message from Contact Form',
+        text: content 
+    }
 
-    smtpTransport.sendMail (mailOptions, (error, res) => {
+    transporter.sendMail (mail, (error, data) => {
         if (error) {
-            res.send (error);
+            res.json ({ msg: 'FAIL' });
         } else {
-            res.send ('SUCCESS');
+            res.json ({ msg: 'SUCCESS'});
         }
-        smtpTransport.close (); 
     });
 });
