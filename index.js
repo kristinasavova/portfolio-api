@@ -43,10 +43,13 @@ app.get ('/', (req, res) => {
 
 /* POST data to the destination email address that is specified. */
 
-app.post ('/send', (req, res, next) => {
+app.post ('/send', (req, res) => {
 
     const { name, email, message } = req.body;
-    const content = `name: ${name} \n email: ${email} \n message: ${message}`;
+    const content = `
+                    <p>name: ${name}<p> 
+                    <p>email: ${email}<p> 
+                    <p>message: ${message}<p>`;
 
     const mail = {
         from: name,
